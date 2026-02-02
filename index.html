@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FILMCREATE // COMMAND CENTER</title>
+    <link rel="stylesheet" href="https://unpkg.com/terminal.css@0.7.2/dist/terminal.min.css" />
+    <style>
+        body { --global-font-size: 15px; padding: 40px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="terminal">
+    <div class="container">
+        <header class="terminal-nav">
+            <div class="terminal-logo">
+                <div class="logo terminal-prompt">FILMCREATE_OS v1.0</div>
+            </div>
+        </header>
+
+        <section id="login-section">
+            <p>ACCESS RESTRICTED. ENTER PRODUCTION EMAIL TO INITIALIZE SESSION:</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">USER@DOMAIN:</label>
+                    <input id="email" type="email" name="email" placeholder="producer@studio.de" required>
+                </div>
+                <button class="btn btn-default" type="submit" id="login-btn">[ SEND_MAGIC_LINK ]</button>
+            </form>
+            <p id="message"></p>
+        </section>
+
+        <section id="dashboard" class="hidden">
+            <p>WELCOME, <span id="user-email"></span>. SYSTEMS NOMINAL.</p>
+            <hr>
+            <div id="rig-list">
+                <pre>SCANNING FOR RIGS...</pre>
+            </div>
+            <button class="btn btn-error" onclick="signOut()">[ LOGOUT ]</button>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
