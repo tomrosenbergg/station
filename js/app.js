@@ -1,5 +1,6 @@
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+const SUPABASE_URL = 'https://ijadcwdubuyjjiypddmn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_KL-lDRyhpERJAFsN5sxPhA_AhxZTN4s';
 const supabase = lib.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const loginForm = document.getElementById('login-form');
