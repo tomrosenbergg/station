@@ -1,6 +1,7 @@
+
 // --- CONFIGURATION ---
-const SUPABASE_URL = 'https://ijadcwdubuyjjiypddmn.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_KL-lDRyhpERJAFsN5sxPhA_AhxZTN4s';
+const PROJECT_URL = 'https://ijadcwdubuyjjiypddmn.supabase.co'; 
+const API_KEY = 'sb_publishable_KL-lDRyhpERJAFsN5sxPhA_AhxZTN4s';
 
 // 1. Check if the library loaded
 if (!window.supabase) {
