@@ -1,0 +1,8 @@
+# Ignore Mac system files
+.DS_Store
+**/.DS_Store
+
+# Optional: Ignore other common junk
+Thumbs.db
+node_modules/
+.env
