@@ -3,44 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FILMCREATE // COMMAND CENTER</title>
-    <link rel="stylesheet" href="https://unpkg.com/terminal.css@0.7.2/dist/terminal.min.css" />
+    <title>Station // FilmCreate</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <style>
-        body { --global-font-size: 15px; padding: 40px; }
+        :root { --pico-border-radius: 8px; }
+        body { background-color: #f4f7f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
+        .logo { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; margin-bottom: 0.5rem; color: #1a1a1a; }
+        .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+        .google-btn { background-color: white; color: #333; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-bottom: 1.5rem; }
+        .google-btn:hover { background-color: #f9f9f9; border-color: #ccc; }
+        .divider { display: flex; align-items: center; text-align: center; margin: 1.5rem 0; color: #999; font-size: 0.8rem; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #eee; }
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
         .hidden { display: none; }
     </style>
 </head>
-<body class="terminal">
-    <div class="container">
-        <header class="terminal-nav">
-            <div class="terminal-logo">
-                <div class="logo terminal-prompt">FILMCREATE_OS v1.0</div>
-            </div>
-        </header>
+<body>
 
-        <section id="login-section">
-            <p>ACCESS RESTRICTED. ENTER PRODUCTION EMAIL TO INITIALIZE SESSION:</p>
+    <div class="login-card">
+        <div id="login-ui">
+            <div class="logo">Station.</div>
+            <p class="subtitle">Cloud editing for film professionals.</p>
+
+            <button class="google-btn" onclick="signInWithGoogle()">
+                <img src="https://www.google.com/favicon.ico" width="16" height="16">
+                Continue with Google
+            </button>
+
+            <div class="divider">or</div>
+
             <form id="login-form">
-                <div class="form-group">
-                    <label for="email">USER@DOMAIN:</label>
-                    <input id="email" type="email" name="email" placeholder="producer@studio.de" required>
-                </div>
-                <button class="btn btn-default" type="submit" id="login-btn">[ SEND_MAGIC_LINK ]</button>
+                <input type="email" id="email" placeholder="Work email address" required>
+                <button type="submit" id="submit-btn">Continue with Email</button>
             </form>
-            <p id="message"></p>
-        </section>
+            <p id="msg" style="font-size: 0.8rem; margin-top: 1rem;"></p>
+        </div>
 
-        <section id="dashboard" class="hidden">
-            <p>WELCOME, <span id="user-email"></span>. SYSTEMS NOMINAL.</p>
+        <div id="dashboard-ui" class="hidden">
+            <p>Welcome back, <strong id="user-display"></strong></p>
             <hr>
-            <div id="rig-list">
-                <pre>SCANNING FOR RIGS...</pre>
+            <div id="rig-status" style="text-align: left; background: #f9f9f9; padding: 1rem; border-radius: 8px;">
+                <small>PROJECT_ALPHA_RIG</small>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong>STATUS: ONLINE</strong>
+                    <button class="outline" style="padding: 4px 12px; font-size: 0.7rem;">[ OPEN ]</button>
+                </div>
             </div>
-            <button class="btn btn-error" onclick="signOut()">[ LOGOUT ]</button>
-        </section>
+            <br>
+            <a href="#" onclick="logout()" style="color: #999; font-size: 0.8rem;">Sign out</a>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/app.js"></script>
+    <script>
+        const supabase = lib.supabase.createClient('YOUR_URL', 'YOUR_ANON_KEY');
+
+        // Logic: Sign in with Google
+        async function signInWithGoogle() {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.href }
+            });
+            if (error) alert(error.message);
+        }
+
+        // Logic: Magic Link
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const { error } = await supabase.auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo: window.location.href }
+            });
+            if (error) document.getElementById('msg').innerText = error.message;
+            else document.getElementById('msg').innerText = "Check your email for the login link!";
+        };
+
+        // UI State Management
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                document.getElementById('login-ui').classList.add('hidden');
+                document.getElementById('dashboard-ui').classList.remove('hidden');
+                document.getElementById('user-display').innerText = session.user.email;
+            }
+        });
+
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.reload();
+        }
+    </script>
 </body>
 </html>
