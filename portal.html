@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Station | Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <div id="app" class="w-full max-w-2xl hidden">
+        <nav class="flex justify-between items-center mb-12">
+            <div class="font-bold text-xl tracking-tight text-gray-800">STATION</div>
+            <button id="logout-btn" class="text-sm text-gray-500 hover:text-red-600 transition">Sign Out</button>
+        </nav>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <h2 class="text-3xl font-light text-gray-900 mb-2">Welcome Back</h2>
+            <p id="user-email" class="text-gray-500 mb-8">...</p>
+
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Account Status</p>
+                    <p id="status-text" class="text-xl font-medium text-gray-800">Loading...</p>
+                </div>
+                <div id="status-dot" class="h-3 w-3 rounded-full bg-gray-300"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Page-specific logic for the Portal
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkSession(true); // 'true' means: redirect to login if no session
+            loadPortalData();
+        });
+    </script>
+</body>
+</html>

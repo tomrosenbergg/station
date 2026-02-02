@@ -3,147 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Station // FilmCreate</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
-    
-    <style>
-        :root { --pico-border-radius: 8px; }
-        body { background-color: #f4f7f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
-        .logo { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; margin-bottom: 0.5rem; color: #1a1a1a; }
-        .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
-        .google-btn { background-color: white; color: #333 !important; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-bottom: 1.5rem; }
-        .google-btn:hover { background-color: #f9f9f9 !important; border-color: #ccc; }
-        .divider { display: flex; align-items: center; text-align: center; margin: 1.5rem 0; color: #999; font-size: 0.8rem; }
-        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #eee; }
-        .divider:not(:empty)::before { margin-right: .5em; }
-        .divider:not(:empty)::after { margin-left: .5em; }
-        .hidden { display: none; }
-        .rig-item { background: #f9f9f9; padding: 1rem; border-radius: 8px; margin-bottom: 10px; text-align: left; border: 1px solid #eee; }
-    </style>
+    <title>Station | Welcome</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-900 font-sans h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="login-card">
-        <div id="login-ui">
-            <div class="logo">Station.</div>
-            <p class="subtitle">Cloud editing for film professionals.</p>
+    <div id="loading" class="text-gray-400 animate-pulse">Connecting to Station...</div>
 
-            <button class="google-btn" onclick="signInWithGoogle()">
-                <img src="https://www.google.com/favicon.ico" width="16" height="16">
-                Continue with Google
-            </button>
-
-            <div class="divider">or</div>
-
-            <form id="login-form">
-                <input type="email" id="email" placeholder="Work email address" required>
-                <button type="submit" id="submit-btn">Continue with Email</button>
-            </form>
-            <p id="msg" style="font-size: 0.8rem; margin-top: 1rem;"></p>
-        </div>
-
-        <div id="dashboard-ui" class="hidden">
-            <p style="margin-bottom: 0;">Welcome back,</p>
-            <strong id="user-display" style="font-size: 0.8rem; color: #666;"></strong>
-            <hr>
-            
-            <div id="rig-list">
-                <p style="font-size: 0.8rem; color: #999;">Checking system status...</p>
+    <div id="auth-container" class="hidden w-full max-w-md bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+        <h1 id="form-title" class="text-2xl font-bold text-gray-800 mb-2 text-center">Join Station</h1>
+        <p class="text-gray-500 text-center mb-6 text-sm">Enter your details to access the portal.</p>
+        
+        <form id="auth-form" class="space-y-4">
+            <div>
+                <input id="email" type="email" placeholder="Email address" required 
+                    class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 transition">
             </div>
+            <div>
+                <input id="password" type="password" placeholder="Password" required 
+                    class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 transition">
+            </div>
+            
+            <p id="error-msg" class="text-red-500 text-sm text-center hidden"></p>
+            <p id="success-msg" class="text-green-500 text-sm text-center hidden"></p>
 
-            <br>
-            <a href="#" onclick="logout()" style="color: #999; font-size: 0.8rem;">Sign out</a>
+            <button type="submit" id="submit-btn"
+                class="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 rounded-lg transition">
+                Sign Up
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-sm text-gray-500">
+            <span id="toggle-text">Already have an account?</span>
+            <button id="toggle-btn" class="ml-1 text-blue-600 hover:underline font-medium">Log In</button>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // Use a different name (_supabase) to avoid clashing with the global library name
-        const { createClient } = supabase;
-        const _supabase = createClient('YOUR_SUPABASE_URL', 'YOUR_PUBLISHABLE_KEY');
-
-        // GOOGLE LOGIN
-        window.signInWithGoogle = async function() {
-            const { error } = await _supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: window.location.origin }
-            });
-            if (error) alert("Google Auth Error: " + error.message);
-        }
-
-        // MAGIC LINK LOGIN
-        document.getElementById('login-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const btn = document.getElementById('submit-btn');
-            
-            btn.innerText = "Sending...";
-            btn.disabled = true;
-
-            const { error } = await _supabase.auth.signInWithOtp({
-                email,
-                options: { emailRedirectTo: window.location.origin }
-            });
-
-            if (error) {
-                document.getElementById('msg').innerText = error.message;
-                btn.innerText = "Continue with Email";
-                btn.disabled = false;
-            } else {
-                document.getElementById('msg').innerText = "Magic link sent! Check your inbox.";
-            }
-        };
-
-        // AUTH STATE LISTENER
-        _supabase.auth.onAuthStateChange(async (event, session) => {
-            if (session) {
-                document.getElementById('login-ui').classList.add('hidden');
-                document.getElementById('dashboard-ui').classList.remove('hidden');
-                document.getElementById('user-display').innerText = session.user.email;
-                
-                // Fetch Rigs from your new 'projects' table
-                fetchUserRigs();
-            }
-        });
-
-        // FETCH RIGS FROM TABLE
-        async function fetchUserRigs() {
-            const { data: rigs, error } = await _supabase
-                .from('projects')
-                .select('*');
-
-            const container = document.getElementById('rig-list');
-
-            if (error) {
-                container.innerHTML = `<small style="color:red">Error loading rigs: ${error.message}</small>`;
-                return;
-            }
-
-            if (rigs && rigs.length > 0) {
-                container.innerHTML = rigs.map(rig => `
-                    <div class="rig-item">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong>${rig.rig_name}</strong>
-                            <span style="font-size:0.7rem; color:green">● ONLINE</span>
-                        </div>
-                        <small style="color:#888">Balance: €${rig.credit_balance}</small>
-                        <div style="display:flex; gap:10px; margin-top:10px;">
-                            <button class="outline" style="padding:2px 10px; font-size:0.6rem; margin:0;">START</button>
-                            <button class="outline" style="padding:2px 10px; font-size:0.6rem; margin:0; border-color:#ccc; color:#666;">REFUEL</button>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = `<p style="font-size:0.8rem; color:#999;">No active rigs. Contact admin to provision a suite.</p>`;
-            }
-        }
-
-        window.logout = async function() {
-            await _supabase.auth.signOut();
-            window.location.reload();
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
