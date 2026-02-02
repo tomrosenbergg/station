@@ -2,31 +2,31 @@
 const SUPABASE_URL = 'https://ijadcwdubuyjjiypddmn.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_KL-lDRyhpERJAFsN5sxPhA_AhxZTN4s';
 
-
-// 1. Check if the CDN library loaded
+// 1. Check if the library loaded
 if (!window.supabase) {
-    console.error('Supabase CDN not loaded. Check your HTML <script> tags.');
+    console.error('Supabase Library not loaded. Check index.html');
 }
 
 // 2. Initialize Client
-// We name this 'sb' to prevent the "Redeclaration" error.
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// We use "client" here to ensure NO CONFLICT with the "supabase" library name
+const client = window.supabase.createClient(PROJECT_URL, API_KEY);
 
 // --- SHARED AUTH LOGIC ---
 
 async function checkSession(requireAuth = false) {
-    const { data: { session } } = await sb.auth.getSession();
+    // NOTICE: We use 'client.auth' now, not 'supabase.auth'
+    const { data: { session } } = await client.auth.getSession();
     
-    // Logic to detect if we are on the landing page or portal page
     const path = window.location.pathname;
-    const isLoginPage = path.endsWith('index.html') || path === '/' || path.endsWith('/');
+    // Check if we are on the login page (index.html or root /)
+    const isLoginPage = path.includes('index.html') || path === '/' || path.endsWith('/');
 
     if (session && isLoginPage) {
         window.location.href = 'portal.html'; 
     } else if (!session && requireAuth) {
         window.location.href = 'index.html';
     } else {
-        // Safe to show content
+        // Reveal the UI
         const loading = document.getElementById('loading');
         const authContainer = document.getElementById('auth-container');
         const app = document.getElementById('app');
@@ -38,7 +38,7 @@ async function checkSession(requireAuth = false) {
     return session;
 }
 
-// --- INDEX.HTML LOGIC (LOGIN/SIGNUP) ---
+// --- INDEX.HTML LOGIC ---
 if (document.getElementById('auth-form')) {
     checkSession(); 
 
@@ -74,13 +74,13 @@ if (document.getElementById('auth-form')) {
 
         let result;
         if (isSignUp) {
-            result = await sb.auth.signUp({ email, password });
+            result = await client.auth.signUp({ email, password });
             if (!result.error) {
                 successMsg.innerText = "Success! Check your email to confirm.";
                 successMsg.classList.remove('hidden');
             }
         } else {
-            result = await sb.auth.signInWithPassword({ email, password });
+            result = await client.auth.signInWithPassword({ email, password });
             if (!result.error) {
                 window.location.href = 'portal.html';
             }
@@ -105,16 +105,16 @@ if (document.getElementById('app')) {
 }
 
 async function loadPortalData() {
-    const { data: { user } } = await sb.auth.getUser();
+    const { data: { user } } = await client.auth.getUser();
     
     document.getElementById('user-email').innerText = user.email;
 
     document.getElementById('logout-btn').addEventListener('click', async () => {
-        await sb.auth.signOut();
+        await client.auth.signOut();
         window.location.href = 'index.html';
     });
 
-    const { data, error } = await sb
+    const { data, error } = await client
         .from('profiles')
         .select('status')
         .eq('id', user.id)
@@ -133,6 +133,6 @@ async function loadPortalData() {
             statusDot.classList.add('bg-yellow-400');
         }
     } else {
-        statusText.innerText = "Profile not found";
+        statusText.innerText = "Pending";
     }
 }
